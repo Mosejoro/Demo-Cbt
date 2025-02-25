@@ -392,11 +392,6 @@ function updateTimerDisplay(seconds) {
   document.getElementById("time-remaining").textContent = `${minutes
     .toString()
     .padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
-
-  // Change color when less than 10 minutes remaining
-  if (seconds < 600) {
-    document.getElementById("time-remaining").style.color = "orange";
-  }
   // Change color when less than 5 minutes remaining
   if (seconds < 300) {
     document.getElementById("time-remaining").style.color = "#ef4444";
