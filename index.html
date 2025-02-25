@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Online Examination System</title>
+    <link rel="stylesheet" href="exam.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img src="your logo.png" />
+        <h1>Online Examination System</h1>
+      </div>
+
+      <div class="selection-form">
+        <div class="form-group">
+          <label for="day">Select Day:</label>
+          <select id="day" class="form-control">
+            <option value="Day1">Monday</option>
+            <option value="Day2">Tuesday</option>
+            <option value="Day3">Wednesday</option>
+            <option value="Day4">Thursday</option>
+            <option value="Day5">Friday</option>
+            <!-- <option value="Day6">Day 6</option> -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="class">Select Class:</label>
+          <select id="class" class="form-control">
+            <option value="P1">Primary 1</option>
+            <option value="P2">Primary 2</option>
+            <option value="P3">Primary 3</option>
+            <option value="P4">Primary 4</option>
+            <option value="P5">Primary 5</option>
+            <option value="P6">Primary 6</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="subject">Select Subject:</label>
+          <select id="subject" class="form-control"></select>
+        </div>
+
+        <button onclick="startExam()" class="btn btn-primary btn-block">
+          Start Exam
+        </button>
+      </div>
+    </div>
+
+    <script>
+      // Move the existing updateSubjects code here
+      const timetable = {
+        Day1: {
+          P1: ["English", "Mathematics"],
+          P2: ["Basic_Science", "CCA"],
+          P3: ["National_Value", "Prevocational_Studies"],
+          P4: ["English", "Mathematics"],
+          P5: ["CRK", "French"],
+          P6: ["English", "Mathematics"],
+        },
+        Day2: {
+          P1: ["CCA", "Basic_Science"],
+          P2: ["English", "Mathematics"],
+          P3: ["CRK", "English"],
+          P4: ["CCA", "Prevocational_Studies"],
+          P5: ["English", "Mathematics"],
+          P6: ["CRK", "French"],
+        },
+        Day3: {
+          P1: ["National_Value", "CRK"],
+          P2: ["Prevocational_Studies", "National_Value"],
+          P3: ["Mathematics", "CCA"],
+          P4: ["Basic_Science", "National_Value"],
+          P5: ["Prevocational_Studies", "CCA"],
+          P6: ["English", "Mathematics"],
+        },
+        Day4: {
+          P1: ["Prevocational_Studies", "English"],
+          P2: ["CRK", "Basic_Science"],
+          P3: ["Basic_Science", "National_Value"],
+          P4: ["CRK", "French"],
+          P5: ["Basic_Science", "National_Value"],
+          P6: ["CCA", "Prevocational_Studies"],
+        },
+        Day5: {
+          P1: ["Mathematics", "Basic_Science"],
+          P2: ["CCA", "English"],
+          P3: ["Prevocational_Studies", "CRK"],
+          P4: ["National_Value", "English"],
+          P5: ["CRK", "Prevocational_Studies"],
+          P6: ["French", "Basic_Science"],
+        },
+        Day6: {
+          P1: ["CRK", "Prevocational_Studies"],
+          P2: ["Mathematics", "National_Value"],
+          P3: ["English", "Mathematics"],
+          P4: ["Basic_Science", "CCA"],
+          P5: ["National_Value", "English"],
+          P6: ["GNS", "CCA"],
+        },
+      };
+
+      document.getElementById("day").addEventListener("change", updateSubjects);
+      document
+        .getElementById("class")
+        .addEventListener("change", updateSubjects);
+
+      function updateSubjects() {
+        let day = document.getElementById("day").value;
+        let cls = document.getElementById("class").value;
+        let subjectsDropdown = document.getElementById("subject");
+
+        subjectsDropdown.innerHTML = "";
+
+        if (timetable[day] && timetable[day][cls]) {
+          timetable[day][cls].forEach((subject) => {
+            let option = document.createElement("option");
+            option.value = subject;
+            option.textContent = subject.replace(/_/g, " ");
+            subjectsDropdown.appendChild(option);
+          });
+        }
+      }
+
+      function startExam() {
+        const day = document.getElementById("day").value;
+        const cls = document.getElementById("class").value;
+        const subject = document.getElementById("subject").value;
+
+        if (!subject) {
+          alert("Please select a subject.");
+          return;
+        }
+
+        // Store selections in localStorage
+        localStorage.setItem("examDay", day);
+        localStorage.setItem("examClass", cls);
+        localStorage.setItem("examSubject", subject);
+
+        // Redirect to questions page
+        window.location.href = "questions.html";
+      }
+
+      // Initialize subjects dropdown
+      updateSubjects();
+    </script>
+  </body>
+</html>

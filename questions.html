@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Exam Questions</title>
+    <link rel="stylesheet" href="exam.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div id="exam-info" class="header"></div>
+
+      <div class="progress-bar">
+        <div class="progress-bar-fill" style="width: 0%"></div>
+      </div>
+
+      <div class="question-container" id="questions">
+        <div class="loading"></div>
+      </div>
+    </div>
+
+    <div class="timer">
+      <span class="timer-icon">⏱</span>
+      <span id="time-remaining">00:00</span>
+    </div>
+    <script src="script.js"></script>
+    <script>
+      // Auto-load questions when page loads
+      window.addEventListener("load", () => {
+        // Get stored exam details
+        const day = localStorage.getItem("examDay");
+        const cls = localStorage.getItem("examClass");
+        const subject = localStorage.getItem("examSubject");
+
+        if (!day || !cls || !subject) {
+          alert("Please select exam details first");
+          window.location.href = "index.html";
+          return;
+        }
+
+        // Display exam info
+        document.getElementById("exam-info").innerHTML = `
+          <h2>Exam Details</h2>
+          <p>Day: ${day}</p>
+          <p>Class: Primary ${cls.substring(1)}</p>
+          <p>Subject: ${subject.replace(/_/g, " ")}</p>
+        `;
+
+        // Auto fetch questions
+        fetchQuestions(day, cls, subject);
+      });
+    </script>
+  </body>
+</html>
