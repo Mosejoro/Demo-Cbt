@@ -64,7 +64,7 @@ function displayQuestions(data, subject, cls) {
     });
   });
   // Add exam metadata section
-  questionsDiv.innerHTML = `
+   questionsDiv.innerHTML = `
     <div class="exam-header">
       <h3>Subject: ${subject.replace(/_/g, " ")}</h3>
       <h4>Class: Primary ${cls.substring(1)}</h4>
@@ -72,7 +72,7 @@ function displayQuestions(data, subject, cls) {
       <h3 class="Warn">Do well to answer all the questions before the time runs out.</h3>
       <div class="student-info">
         <label for="username">Full Name:</label>
-        <input type="text" id="username" placeholder="Ada Success" required>
+        <input class="Input" type="text" id="username" placeholder="e.g Yisa Tabitha" required>
       </div>
     </div>
   `;
@@ -86,8 +86,9 @@ function displayQuestions(data, subject, cls) {
       B: row[2],
       C: row[3],
       D: row[4],
+      E: row[5],
     };
-    let correctAnswer = row[5];
+    let correctAnswer = row[6];
 
     questionsData.push({
       questionNumber: i,
@@ -96,9 +97,22 @@ function displayQuestions(data, subject, cls) {
       cls,
     });
 
+    // Check if the question contains an image URL
+    let processedQuestion = questionText;
+    let imageHTML = "";
+
+    // Process the question text to extract and handle image URLs
+    const { processedText, imageHtmlContent } = processQuestionImages(
+      questionText,
+      i
+    );
+    processedQuestion = processedText;
+    imageHTML = imageHtmlContent;
+
     let questionHTML = `
-      <div class="question-container ">
-        <p class="question-text"><strong>Question ${i}:</strong> ${questionText}</p>
+      <div class="question-container">
+        <p class="question-text"><strong>Question ${i}:</strong> ${processedQuestion}</p>
+        ${imageHTML}
         <div class="options-container">
           ${Object.entries(options)
             .map(
@@ -124,6 +138,92 @@ function displayQuestions(data, subject, cls) {
 
   // Add this line to set up the listeners for removing the "unanswered" class
   addRadioChangeListeners();
+
+  // Setup image error handling
+  setupImageErrorHandling();
+}
+
+// Helper function to process question images - handles both regular and Google Drive images
+function processQuestionImages(questionText, questionNumber) {
+  let processedText = questionText;
+  let imageHtmlContent = "";
+
+  // Regular expression for standard image URLs
+  const standardImageRegex = /(https?:\/\/[^\s]+\.(jpg|jpeg|png|gif|webp))/gi;
+
+  // Regular expression for Google Drive links
+  // This matches patterns like:
+  // https://drive.google.com/file/d/FILEID/view
+  // https://drive.google.com/open?id=FILEID
+  const googleDriveRegex =
+    /(https?:\/\/drive\.google\.com\/file\/d\/([^\/\s]+)\/view[^\s]*|https?:\/\/drive\.google\.com\/open\?id=([^\s&]+))/gi;
+
+  // First check for Google Drive links
+  const driveMatches = [...questionText.matchAll(googleDriveRegex)];
+
+  if (driveMatches && driveMatches.length > 0) {
+    for (const match of driveMatches) {
+      const fullUrl = match[0];
+      // Extract fileId from the URL - either from /d/FILEID/view or ?id=FILEID
+      const fileId = match[2] || match[3];
+
+      if (fileId) {
+        // Create a direct link for the image
+        // This format allows direct image embedding from Google Drive
+        const directImageUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
+
+        // Replace the Google Drive URL in the question text
+        processedText = processedText.replace(fullUrl, "");
+
+        // Create image HTML
+        imageHtmlContent += `<div class="question-image-container">
+          <img src="${directImageUrl}" alt="Question ${questionNumber} image" class="question-image" data-source="google-drive">
+        </div>`;
+      }
+    }
+  }
+  // If no Google Drive links, check for standard image URLs
+  else {
+    const standardMatches = [...questionText.matchAll(standardImageRegex)];
+
+    if (standardMatches && standardMatches.length > 0) {
+      for (const match of standardMatches) {
+        const imageUrl = match[0];
+
+        // Replace the URL in the question text
+        processedText = processedText.replace(imageUrl, "");
+
+        // Create image HTML
+        imageHtmlContent += `<div class="question-image-container">
+          <img src="${imageUrl}" alt="Question ${questionNumber} image" class="question-image">
+        </div>`;
+      }
+    }
+  }
+
+  return { processedText, imageHtmlContent };
+}
+
+// Function to handle image loading errors
+function setupImageErrorHandling() {
+  document.querySelectorAll(".question-image").forEach((img) => {
+    img.onerror = function () {
+      this.onerror = null;
+
+      // Custom message for Google Drive images
+      const errorMessage =
+        this.dataset.source === "google-drive"
+          ? "Google Drive image could not be loaded. Make sure the file is publicly accessible."
+          : "Image could not be loaded";
+
+      this.parentNode.innerHTML = `
+        <div class="image-error">
+          <p>${errorMessage}</p>
+          <small>${this.src}</small>
+        </div>
+      `;
+    };
+  });
 }
 
 // Check answers and calculate score
@@ -346,7 +446,7 @@ if (window.location.pathname.includes("questions.html")) {
 }
 
 // Timer functionality
-let examDuration = 30 * 60; // 30 minutes in seconds
+let examDuration = 11 * 60; // 30 minutes in seconds
 let timerInterval;
 
 function startTimer() {
@@ -378,10 +478,10 @@ function startTimer() {
 
     // Warning when 5 minutes remaining
     if (timeLeft === 600) {
-      showTimerWarning();
+      showTimerWarning("10 Minutes Remaining!");
     }
     if (timeLeft === 300) {
-      showTimerWarning();
+      showTimerWarning("5 minutes remaining!");
     }
   }, 1000);
 }
@@ -392,6 +492,11 @@ function updateTimerDisplay(seconds) {
   document.getElementById("time-remaining").textContent = `${minutes
     .toString()
     .padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+
+  // Change color when less than 10 minutes remaining
+  if (seconds < 600) {
+    document.getElementById("time-remaining").style.color = "orange";
+  }
   // Change color when less than 5 minutes remaining
   if (seconds < 300) {
     document.getElementById("time-remaining").style.color = "#ef4444";
@@ -402,8 +507,7 @@ function showTimerWarning() {
   // Create a warning toast
   const toast = document.createElement("div");
   toast.className = "toast toast-warning";
-  toast.innerHTML =
-    "<strong>5 minutes remaining!</strong> Please finish your exam.";
+  toast.innerHTML = "Time is Ticking!!!";
   document.body.appendChild(toast);
 
   // Remove toast after 5 seconds
