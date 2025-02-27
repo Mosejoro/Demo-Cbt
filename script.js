@@ -446,7 +446,7 @@ if (window.location.pathname.includes("questions.html")) {
 }
 
 // Timer functionality
-let examDuration = 11 * 60; // 30 minutes in seconds
+let examDuration = 30 * 60; // 30 minutes in seconds
 let timerInterval;
 
 function startTimer() {
