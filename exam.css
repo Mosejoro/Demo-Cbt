@@ -28,7 +28,7 @@
 body {
   font-family: "Inter", system-ui, -apple-system, sans-serif;
   line-height: 1.5;
-  background: #0070ba;
+  background: linear-gradient(135deg, #f6f7ff 0%, #ffffff 100%);
   min-height: 100vh;
   color: var(--gray-800);
   padding: 2rem;
@@ -47,10 +47,12 @@ body {
 /* Header Styles */
 .header {
   text-align: center;
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
   border-bottom: 2px solid var(--gray-200);
 }
 .header img {
-  width: 12rem;
+  width: 6rem;
   animation: Joy 2s infinite linear;
 }
 @keyframes Joy {
@@ -359,7 +361,9 @@ button:hover {
   border-radius: 0.5rem;
   background: white;
   box-shadow: var(--shadow-lg);
-  animation: slideIn 0.3s ease-out;
+  animation: slide-in 0.3s ease-out, fade-out 0.5s ease-in 4.5s forwards;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .toast-success {
@@ -370,12 +374,23 @@ button:hover {
   border-left: 4px solid var(--danger);
 }
 
-@keyframes slideIn {
+@keyframes slide-in {
   from {
     transform: translateX(100%);
+    opacity: 0;
   }
   to {
     transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
   }
 }
 .question-container.unanswered {
@@ -488,7 +503,24 @@ button:hover {
   content: "⏰";
   font-size: 1.5rem;
 }
+.toast-warning.warning-10 {
+  background-color: #e3f2fd;
+  border-left: 4px solid #2196f3;
+  color: #0d47a1;
+}
 
+/* 5-minute warning specific style */
+.toast-warning.warning-5 {
+  background-color: #ffebee;
+  border-left: 4px solid #f44336;
+  color: #b71c1c;
+}
+
+.toast strong {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
 /* Progress Bar Enhancements */
 .progress-bar {
   width: 100%;
@@ -733,50 +765,61 @@ button:hover {
     opacity: 1;
   }
 }
-.submit-btn,
-.ut-btn,
-.sub-btn {
+.submit-btn {
   background-color: var(--warning);
   color: white;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.submit-btn:hover,
-.ut-btn:hover,
-.sub-btn:hover {
+.submit-btn:hover {
   background-color: var(--success);
 }
 .Warn {
   color: var(--danger);
 }
-.error {
+
+/* Enhanced styles for question images */
+.question-image-container {
+  margin: 15px 0;
+  max-width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.question-image {
+  max-width: 100%;
+  max-height: 300px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading state */
+.question-image:not([loaded]) {
+  min-height: 100px;
+  background: #f5f5f5
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 38 38"><circle stroke="%23ccc" stroke-opacity=".5" fill="none" cx="19" cy="19" r="18" stroke-width="2"/><path fill="%23ccc" d="M36 19c0-9.94-8.06-18-18-18"><animateTransform attributeName="transform" type="rotate" from="0 19 19" to="360 19 19" dur="1s" repeatCount="indefinite"/></path></svg>')
+    center no-repeat;
+}
+
+/* Error state */
+.image-error {
+  padding: 15px;
+  background-color: #fff8f8;
+  border: 1px solid #ffebeb;
+  border-radius: 4px;
+  color: #d32f2f;
   text-align: center;
-}
-@media screen and (max-width: 767px) {
-  .error {
-    text-align: left;
-  }
-}
-/* Add this to your exam.css file */
-.spinner {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  margin-right: 10px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  border-top-color: #fff;
-  animation: spin 1s ease infinite;
-  vertical-align: middle;
+  max-width: 100%;
 }
 
-.submit-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+.image-error small {
+  display: block;
+  font-size: 0.8em;
+  color: #888;
+  word-break: break-all;
+  margin-top: 5px;
 }
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+.Input {
+  text-transform: uppercase;
 }
