@@ -72,7 +72,7 @@ function displayQuestions(data, subject, cls) {
       <h3 class="Warn">Do well to answer all the questions before the time runs out.</h3>
       <div class="student-info">
         <label for="username">Full Name:</label>
-        <input class="Input" type="text" id="username" placeholder="e.g Yisa Tabitha" required>
+        <input class="Input" type="text" id="username" placeholder="e.g Ada Success" required>
       </div>
     </div>
   `;
