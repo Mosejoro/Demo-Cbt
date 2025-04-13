@@ -9,6 +9,11 @@ function getSheetName(subject, classLevel) {
   return `${subject.replace(/\s+/g, "")}_${classLevel}`;
 }
 
+// Helper Functions
+function getSheetName(subject, classLevel) {
+  return `${subject.replace(/\s+/g, "")}_${classLevel}`;
+}
+
 // Fetch and Display Questions
 async function fetchQuestions(day, cls, subject) {
   if (!subject) {
@@ -34,7 +39,7 @@ async function fetchQuestions(day, cls, subject) {
       <p class="error">Error: Could not load questions for ${subject.replace(
         /_/g,
         " "
-      )} - ${cls} .is not yet available</p>
+      )} - ${cls}.</p>
       <p>Please make sure the corresponding sheet exists in the spreadsheet.</p>
       <button onclick="window.location.href='index.html'" class="back-btn">Go Back</button>
     `;
@@ -45,6 +50,17 @@ async function fetchQuestions(day, cls, subject) {
 let questionsData = [];
 
 // Display questions in HTML
+// Updated displayQuestions function with image support
+// Updated displayQuestions function with Google Drive image support
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
 function displayQuestions(data, subject, cls) {
   let questionsDiv = document.getElementById("questions");
   questionsDiv.innerHTML = "";
@@ -54,32 +70,43 @@ function displayQuestions(data, subject, cls) {
     questionsDiv.innerHTML = "<p>No questions found.</p>";
     return;
   }
-  document.querySelectorAll(".option-label input").forEach((radio) => {
-    radio.addEventListener("change", (e) => {
-      // Find the question container and remove the unanswered class
-      const questionContainer = e.target.closest(".question-container");
-      if (questionContainer) {
-        questionContainer.classList.remove("unanswered");
-      }
-    });
-  });
+
+  // Separate header row and question rows
+  const headerRow = data[0];
+  const questionRows = data.slice(1);
+
+  // Keep first 7 questions fixed, shuffle only the remaining questions
+  const fixedQuestions = questionRows.slice(0, 7);
+  const questionsToShuffle = questionRows.slice(7);
+  const shuffledRemainingQuestions = shuffleArray(questionsToShuffle);
+
+  // Combine fixed questions with shuffled remaining questions
+  const finalQuestionRows = [...fixedQuestions, ...shuffledRemainingQuestions];
+
   // Add exam metadata section
-   questionsDiv.innerHTML = `
-    <div class="exam-header">
+  questionsDiv.innerHTML = `
+       <div class="exam-header">
       <h3>Subject: ${subject.replace(/_/g, " ")}</h3>
       <h4>Class: Primary ${cls.substring(1)}</h4>
-      <h3 class="Warn">If you don't answer all the questions, you'll not be able to submit.</h3>
       <h3 class="Warn">Do well to answer all the questions before the time runs out.</h3>
       <div class="student-info">
-        <label for="username">Full Name:</label>
-        <input class="Input" type="text" id="username" placeholder="e.g Ada Success" required>
+        <div class="name-inputs">
+          <div class="input-group">
+            <label for="surname">Surname:</label>
+            <input class="Input" type="text"oninput="this.value = this.value.toUpperCase()" id="surname" placeholder="e.g. Success" required>
+          </div>
+          <div class="input-group">
+            <label for="firstname">First Name:</label>
+            <input class="Input" type="text" id="firstname" oninput="this.value = this.value.toUpperCase()" placeholder="e.g. Ada" required>
+          </div>
+        </div>
       </div>
     </div>
   `;
 
   // Create questions
-  for (let i = 1; i < data.length; i++) {
-    let row = data[i];
+  for (let i = 0; i < finalQuestionRows.length; i++) {
+    let row = finalQuestionRows[i];
     let questionText = row[0];
     let options = {
       A: row[1],
@@ -89,9 +116,23 @@ function displayQuestions(data, subject, cls) {
     };
     let correctAnswer = row[5];
 
+    // Shuffle the options while maintaining the correct mapping
+    const optionKeys = ["A", "B", "C", "D"];
+    const shuffledOptionKeys = shuffleArray([...optionKeys]);
+
+    // Create shuffled options object
+    const shuffledOptions = {};
+    shuffledOptionKeys.forEach((newKey, index) => {
+      shuffledOptions[newKey] = options[optionKeys[index]];
+    });
+
+    // Find the new key for the correct answer
+    const newCorrectAnswerKey =
+      shuffledOptionKeys[optionKeys.indexOf(correctAnswer)];
+
     questionsData.push({
-      questionNumber: i,
-      correctAnswer,
+      questionNumber: i + 1,
+      correctAnswer: newCorrectAnswerKey,
       subject,
       cls,
     });
@@ -110,22 +151,23 @@ function displayQuestions(data, subject, cls) {
 
     let questionHTML = `
       <div class="question-container">
-        <p class="question-text"><strong>Question ${i}:</strong> ${processedQuestion}</p>
+        <p class="question-text"><strong>Question ${
+          i + 1
+        }:</strong> ${processedQuestion}</p>
         ${imageHTML}
         <div class="options-container">
-          ${Object.entries(options)
+          ${Object.entries(shuffledOptions)
             .map(
               ([key, value]) => `
             <label class="option-label">
-              <input type="radio" name="q${i}" value="${key}" required> 
-              ${key}) ${value}
+              <input type="radio" name="q${i + 1}" value="${key}" required> 
+              ${value}
             </label>
           `
             )
             .join("")}
         </div>
-      </div>
-    `;
+  `;
 
     questionsDiv.innerHTML += questionHTML;
   }
@@ -140,6 +182,20 @@ function displayQuestions(data, subject, cls) {
 
   // Setup image error handling
   setupImageErrorHandling();
+}
+// Helper function to shuffle options while preserving the correct answer's mapping
+function shuffleOptionsPreservingCorrectAnswer(options, correctAnswer) {
+  const optionsArray = Object.entries(options);
+  const shuffledArray = shuffleArray([...optionsArray]);
+  return Object.fromEntries(shuffledArray);
+}
+
+// Helper function to get the new letter corresponding to the correct answer after shuffling
+function getShuffledCorrectAnswer(shuffledOptions, originalCorrectAnswer) {
+  const originalOptions = ["A", "B", "C", "D"];
+  const shuffledKeys = Object.keys(shuffledOptions);
+  const originalIndex = originalOptions.indexOf(originalCorrectAnswer);
+  return shuffledKeys[originalIndex];
 }
 
 // Helper function to process question images - handles both regular and Google Drive images
@@ -241,9 +297,10 @@ function checkAnswers() {
     clearInterval(timerInterval);
   }
 
-  let username = document.getElementById("username").value.trim();
-  if (!username) {
-    alert("Please enter your name before submitting.");
+  let surname = document.getElementById("surname").value.trim();
+  let firstname = document.getElementById("firstname").value.trim();
+  if (!surname || !firstname) {
+    alert("Please enter both your surname and first name before submitting.");
     // Reset the submit button
     submitBtn.innerHTML = "Submit Exam";
     submitBtn.disabled = false;
@@ -332,7 +389,7 @@ function checkAnswers() {
 
     return;
   }
-
+  const username = `${surname} ${firstname}`;
   // Proceed with calculating score and submitting
   let score = 0;
   let responses = [];
@@ -355,7 +412,9 @@ function checkAnswers() {
   // Prepare result data
   const resultData = {
     timestamp: new Date().toISOString(),
-    name: username,
+    name: username, // This ensures compatibility with existing sheet
+    surname: surname, // Add new fields for more detailed tracking
+    firstname: firstname,
     subject:
       localStorage.getItem("examSubject") ||
       document.getElementById("subject").value,
@@ -437,6 +496,7 @@ if (window.location.pathname.includes("questions.html")) {
       <p>Day: ${day}</p>
       <p>Class: Primary ${cls.substring(1)}</p>
       <p>Subject: ${subject.replace(/_/g, " ")}</p>
+      
     `;
 
     // Auto fetch questions
@@ -445,7 +505,7 @@ if (window.location.pathname.includes("questions.html")) {
 }
 
 // Timer functionality
-let examDuration = 30 * 60; // 30 minutes in seconds
+let examDuration =40 * 60; // 30 minutes in seconds
 let timerInterval;
 
 function startTimer() {
