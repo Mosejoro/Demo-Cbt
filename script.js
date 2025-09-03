@@ -468,7 +468,7 @@ function displayResults(resultData) {
        
       </div>
       <button onclick="window.location.href='index.html'" class="submit-btn">Take Another Exam</button>
-    </div>
+      <a href="https://docs.google.com/spreadsheets/d/1jW19S4GxHlOxSrDSZoTFS1dPyq5f-8i6j-Xs_XEBwU8/edit?usp=drivesdk">Check Results</a> </div>
   `;
 
   // Clear the stored exam details
