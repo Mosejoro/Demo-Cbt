@@ -464,8 +464,12 @@ function displayResults(resultData) {
     <div class="results-container">
       <h2><strong>${resultData.name}</strong>, Well done on your exam!</h2>
       <div class="results-summary">
-      <p>Keep going, you’re doing great! Just take it one step at a time.</p>
-       
+      <p>Keep going, you’re doing great! Just take it one step at a time.<br> Check your results</p>
+       <a href="https://docs.google.com/spreadsheets/d/1jW19S4GxHlOxSrDSZoTFS1dPyq5f-8i6j-Xs_XEBwU8/edit?usp=drivesdk"
+          target="_blank" rel="noopener noreferrer"
+             style="display:inline-block;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:600;font-family:system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif;border:1px solid #ccc;">
+               ✅ Check Your Exam Results (Demo)
+               </a>
       </div>
       <button onclick="window.location.href='index.html'" class="submit-btn">Take Another Exam</button>
       </div>
